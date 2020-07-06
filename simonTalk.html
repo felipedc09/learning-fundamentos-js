@@ -11,6 +11,7 @@
         display: flex;
         align-items: center;
         height: 100vh;
+        font-family: Georgia, 'Times New Roman', Times, serif;
       }
 
       .gameboard {
@@ -91,8 +92,9 @@
       <div id="violeta" class="color violeta right" data-color="violeta"></div>
       <div id="naranja" class="color naranja left" data-color="naranja"></div>
       <div id="verde" class="color verde right" data-color="verde"></div>
-      <button id="btnEmpezar" class="btn-start" onclick="empezarJuego()">Empezar a jugar!</button>
+      <button id="btnEmpezar" class="btn-start" onclick="play()">Empezar a jugar!</button>
     </div>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script>
       const celeste = document.getElementById('celeste')
       const violeta = document.getElementById('violeta')
@@ -100,18 +102,125 @@
       const verde = document.getElementById('verde')
       const btnEmpezar = document.getElementById('btnEmpezar')
 
-      class Juego {
+      class Game {
         constructor() {
-          this.inicializar()
+          this.initialize()
         }
 
-        inicializar() {
-          btnEmpezar.classList.add('hide')
+        initialize() {
+          this.selectColor = this.selectColor.bind(this)
+          toggleButton()
+          this.level = 1
+          this.lastLevel = 2
+          this.colorSequence = []
+          this.colors = [
+            celeste,
+            violeta,
+            naranja,
+            verde,
+          ]
+          this.generateSequence()
+          setTimeout(()=> this.chargeLevel(), 500)
+        }
+
+        chargeLevel() {
+          this.secuenceToVerify = [...this.colorSequence]
+          this.higthLigthSequence()
+          this.addColorClick()
+        }
+
+        generateSequence() {
+          this.colorSequence = new Array(this.lastLevel)
+            .fill(this.colors[0])
+            .map(color => this.colors[Math.floor(Math.random()*4)])
+        }
+
+        higthLigthSequence() {
+          for (let index = 0; index < this.level; index++) {
+            const color = this.colorSequence[index]
+            setTimeout(()=> this.higthLigthColor(color), 1000 * index)
+          }
+        }
+
+        higthLigthColor(color) {
+          color.classList.add('light')
+          setTimeout(()=> this.dimColor(color), 350)
+        }
+
+        dimColor(color) {
+          color.classList.remove('light')
+        }
+
+        nextLevel () {
+          this.level++
+          this.deleteColorClick()
+          this.chargeLevel()
+        }
+
+        addColorClick() {
+          this.colors.forEach((color)=>{
+            color.addEventListener('click', this.selectColor)
+          })
+        }
+
+        deleteColorClick() {
+          this.colors.forEach((color)=>{
+            color.removeEventListener('click', this.selectColor)
+          })
+        }
+
+        selectColor(event) {
+          const color = event.target
+          this.higthLigthColor(color)
+          setTimeout(()=> this.verifySecuence(color), 500)
+        }
+
+        async winLevel() {
+          if (this.level === this.lastLevel) {
+            this.winGame()}
+          else {
+            await swal('Simon talk', `You win level ${this.level}. Now more dificult`, 'success')
+            setTimeout(()=> this.nextLevel(), 1000)
+          }
+        }
+
+        async loseGame() {
+          await swal('Simon talk', 'You lose, try in a new game', 'error')
+          this.resetGame()
+        }
+
+        async winGame() {
+          await swal('Simon talk', '!!You win the game', 'success')
+          this.resetGame()
+        }
+
+        resetGame() {
+          this.deleteColorClick()
+          toggleButton()
+        }
+
+        verifySecuence(color) {
+          if(this.secuenceToVerify.length !== this.colorSequence.length-this.level) {
+            if(color === this.secuenceToVerify[0]) {
+              this.secuenceToVerify.shift()
+            }else{
+              this.loseGame()
+            }
+          }
+          this.secuenceToVerify.length === this.colorSequence.length-this.level && this.winLevel()
         }
       }
 
-      function empezarJuego() {
-        var juego = new Juego()
+      function play() {
+        var game = new Game()
+      }
+
+      function toggleButton() {
+        if (btnEmpezar.classList.contains('hide')) {
+          btnEmpezar.classList.remove('hide')
+        } else {
+          btnEmpezar.classList.add('hide')
+        }
       }
     </script>
   </body>
