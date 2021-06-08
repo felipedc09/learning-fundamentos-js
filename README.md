@@ -1,2 +1,2 @@
-# learning-fundamentos-js
-Game created with all the concepts used into the Fundamentos de JavaScript course of Platzi
+# simon-talk
+Game created with all the concepts used into the Fundamentos de JavaScript course of Platzi to learning JS basics.
